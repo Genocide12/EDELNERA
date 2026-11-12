@@ -1,0 +1,37 @@
+name: EDELNERA · Visual browser QA
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Start preview server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/edelnera-http.log 2>&1 &
+          for i in {1..30}; do if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi; sleep 1; done
+          cat /tmp/edelnera-http.log
+          exit 1
+      - name: Render desktop and iPhone previews
+        run: node tests/visual.test.mjs
+      - name: Attach render screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edelnera-visual-previews
+          path: artifacts/*.png
+          if-no-files-found: warn
+          retention-days: 14
