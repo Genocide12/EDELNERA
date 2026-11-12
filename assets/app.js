@@ -15,7 +15,7 @@ const baseProducts=[
 {id:'bag-classic',name:'EDELNERA Small Tote',category:'Аксессуары',price:9800,compare:0,stock:13,sizes:['ONE SIZE'],image:'docs/atelier-bag.jpg',video:'',badge:'',color:'Шоколад',material:'Экокожа',description:'Всё необходимое, без ничего лишнего.',featured:false},
 {id:'suit-studio',name:'Studio Blazer',category:'Костюмы',price:15400,compare:0,stock:7,sizes:['XS','S','M','L','XL'],image:'docs/atelier-suit.jpg',video:'',badge:'',color:'Тёмно-зелёный',material:'Твил',description:'Пластичная посадка, выразительные детали.',featured:false}
 ];
-const seed=()=>({products:structuredClone(baseProducts),cart:[],favorites:[],orders:[],coupons:[{code:'WELCOME10',discount:10,active:true}],profile:{height:'',chest:'',waist:'',hips:'',shoulders:'',name:''},settings:{season:'AUTUMN / WINTER 2026—27',heroTitle:'Искусство\nбыть собой.',heroSubtitle:'Современная элегантность, созданная вокруг вашей индивидуальности.',heroVideo:'',announcement:'THE EDELNERA EDITION'},theme:'atelier'});
+const seed=()=>({products:JSON.parse(JSON.stringify(baseProducts)),cart:[],favorites:[],orders:[],coupons:[{code:'WELCOME10',discount:10,active:true}],profile:{height:'',chest:'',waist:'',hips:'',shoulders:'',name:''},settings:{season:'AUTUMN / WINTER 2026—27',heroTitle:'Искусство\nбыть собой.',heroSubtitle:'Современная элегантность, созданная вокруг вашей индивидуальности.',heroVideo:'',announcement:'THE EDELNERA EDITION'},theme:'atelier'});
 function load(){try{const raw=localStorage.getItem(STORAGE);if(!raw)return seed();const a=JSON.parse(raw);const s=seed();if(a&&typeof a==='object'){for(const key of ['products','cart','favorites','orders','coupons'])if(Array.isArray(a[key]))s[key]=a[key];if(a.profile&&typeof a.profile==='object')s.profile={...s.profile,...a.profile};if(a.settings&&typeof a.settings==='object')s.settings={...s.settings,...a.settings};if(['atelier','noir','malachite'].includes(a.theme))s.theme=a.theme;}return s}catch(e){return seed()}}
 let db=load();
 const view={route:'home',filter:'Все',sort:'featured',search:'',selectedSize:'M',adminTab:'dashboard',editId:null,pick:db.products[0]?.id,face:null,faceX:40,faceY:10,faceScale:1,motion:false,uploadedImage:null,appliedPromo:'',orderDone:null,adminSearch:'',videoPreview:null};
@@ -254,7 +254,7 @@ el('app').innerHTML=html;
 el('cart-count').textContent=db.cart.reduce((n,l)=>n+l.qty,0);el('cart-count').hidden=!db.cart.length;
 el('mobile-nav').hidden=true;document.querySelector('.menu-toggle').setAttribute('aria-expanded','false');
 el('theme-popover').hidden=true;
-el('announcement').firstElementChild.textContent=db.settings.announcement;
+if(el('announcement'))el('announcement').firstElementChild.textContent=db.settings.announcement;
 savedTheme();
 document.querySelectorAll('img').forEach(img=>{img.addEventListener('error',()=>{if(!img.dataset.fallback){img.dataset.fallback='1';img.src='docs/atelier-coat.jpg';}})});
 }
