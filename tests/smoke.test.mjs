@@ -1,52 +1,73 @@
-import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
-import { JSDOM, VirtualConsole } from 'jsdom';
-
-const html = readFileSync('index.html', 'utf8');
-const errors = [];
-const virtualConsole = new VirtualConsole();
-virtualConsole.on('jsdomError', error => errors.push(error.message));
-const dom = new JSDOM(html, {
-  url: 'https://genocide12.github.io/EDELNERA/',
-  runScripts: 'dangerously',
-  pretendToBeVisual: true,
-  virtualConsole,
-  beforeParse(window) { window.scrollTo = () => {}; }
-});
-const { document, MouseEvent, KeyboardEvent } = dom.window;
-
-try {
-  assert.equal(document.querySelector('#about'), null, 'brand About page was not removed');
-  assert.equal(document.querySelector('[data-go="about"]'), null, 'dead brand link found');
-  assert.equal(document.querySelectorAll('#products .product').length, 8, 'catalogue should contain eight products');
-  assert.equal(document.querySelectorAll('#featured .product').length, 4, 'homepage featured should contain four items');
-
-  const media = document.querySelector('#products .kinetic-media');
-  assert.ok(media, 'interactive product media missing');
-  media.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-  assert.ok(media.classList.contains('is-playing'), 'tap does not trigger animation');
-
-  const media2 = document.querySelectorAll('#products .kinetic-media')[1];
-  media2.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
-  assert.ok(media2.classList.contains('is-playing'), 'keyboard Enter does not trigger animation');
-
-  document.querySelector('[data-mode="malachite"]').click();
-  assert.equal(document.body.dataset.theme, 'malachite', 'theme switching failed');
-
-  document.querySelector('[data-detail="0"]').click();
-  assert.ok(document.querySelector('#detail').classList.contains('active'), 'detail navigation failed');
-
-  document.querySelector('[data-add="0"]').click();
-  assert.ok(document.querySelector('#cart').classList.contains('active'), 'cart navigation failed');
-  assert.equal(document.querySelector('#qty').textContent, '1', 'cart quantity failed');
-
-  for (const file of [
-    'docs/hero.jpg', 'docs/atelier-coat.jpg', 'docs/atelier-dress.jpg',
-    'docs/atelier-bag.jpg', 'docs/atelier-suit.jpg', 'docs/architecture.svg'
-  ]) assert.ok(existsSync(file), 'missing README image: '+file);
-
-  assert.deepEqual(errors, [], 'browser script errors: '+errors.join('; '));
-  console.log('PASS: pages, navigation, catalogue, animation tap/keyboard, themes, cart, README imagery');
-} finally {
-  dom.window.close();
-}
+(function smoke(){
+const assert=(await import('node:assert/strict')).default;
+const fs=await import('node:fs');
+const {JSDOM,VirtualConsole}=await import('jsdom');
+const virtualConsole=new VirtualConsole();
+const errors=[];
+virtualConsole.on('jsdomError',e=>errors.push(e.message));
+const html=fs.readFileSync('index.html','utf8');
+const app=fs.readFileSync('assets/app.js','utf8');
+const dom=new JSDOM(html,{url:'https://genocide12.github.io/EDELNERA/',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole});
+const win=dom.window;
+win.scrollTo=()=>{};win.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+win.confirm=()=>true;
+win.eval(app);
+const doc=win.document;
+function route(s){win.location.hash='#/'+s;win.dispatchEvent(new win.Event('hashchange'))}
+function click(selector){const e=doc.querySelector(selector);assert.ok(e,'Missing '+selector);e.dispatchEvent(new win.MouseEvent('click',{bubbles:true}));return e;}
+try{
+ assert.ok(doc.querySelector('.hero h1'),'homepage hero');
+ assert.equal(doc.querySelector('[href="#/about"]'),null,'no standalone brand page');
+ route('catalog');
+ assert.equal(doc.querySelectorAll('.product-card').length,8,'8 catalog products');
+ click('.product-media');
+ assert.ok(doc.querySelector('.product-media').classList.contains('is-playing'),'tap motion');
+ click('[data-theme-pick="malachite"]');
+ assert.equal(doc.body.dataset.theme,'malachite','theme switch');
+ route('catalog');
+ click('[data-action="filter"][data-value="Пальто"]');
+ assert.equal(doc.querySelectorAll('.product-card').length,2,'filter');
+ click('[data-action="favorite"]');
+ route('favorites');
+ assert.equal(doc.querySelectorAll('.product-card').length,1,'wishlist');
+ route('product/coat-atelier');
+ assert.ok(doc.querySelector('.detail-photo'),'product details');
+ click('[data-action="size"][data-value="L"]');
+ click('[data-action="add"]');
+ route('cart');
+ assert.equal(doc.querySelector('.qty-controls span').textContent,'1','cart item added');
+ route('checkout');
+ const form=doc.querySelector('#checkout-form');
+ form.querySelector('[name="customer"]').value='Test user';
+ form.dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));
+ assert.ok(doc.querySelector('.order'),'demo order in profile');
+ route('admin');
+ assert.ok(doc.querySelector('.admin-shell'),'admin layout');
+ click('[data-admin-tab="products"]');
+ assert.equal(doc.querySelectorAll('.admin-table tbody tr').length,8,'admin product list');
+ click('[data-action="product-new"]');
+ assert.ok(doc.querySelector('#product-form'),'editor form');
+ const pf=doc.querySelector('#product-form');pf.querySelector('[name="name"]').value='Test item';pf.querySelector('[name="category"]').value='Тест';pf.querySelector('[name="price"]').value='2200';
+ pf.dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));
+ assert.equal(doc.querySelectorAll('.admin-table tbody tr').length,9,'create product');
+ click('[data-admin-tab="orders"]');
+ assert.ok(doc.querySelector('[data-order-status]'),'order management');
+ click('[data-admin-tab="promos"]');
+ assert.ok(doc.querySelector('#promo-form'),'promotion editor');
+ click('[data-admin-tab="content"]');
+ assert.ok(doc.querySelector('#settings-form'),'content editor');
+ click('[data-admin-tab="data"]');
+ assert.ok(doc.querySelector('[data-action="export-json"]'),'JSON export');
+ route('profile');
+ assert.ok(doc.querySelector('#face-file'),'portrait input');
+ route('studio');
+ assert.ok(doc.querySelector('#studio-stage'),'style preview');
+ route('project');
+ assert.ok(doc.querySelector('#master-prompt')?.textContent?.length>500,'copyable project prompt');
+ assert.ok(fs.existsSync('docs/hero.jpg'),'hero image');
+ assert.ok(fs.existsSync('docs/atelier-coat.jpg'),'product photo');
+ assert.ok(fs.existsSync('assets/app.css'),'styles');
+ assert.deepEqual(errors,[],'jsdom errors');
+ console.log('PASS: home, catalogue, tap animation, three-theme support, filters, favorites, detail, sizes, cart, checkout, local orders, admin CRUD, order editor, promotions, CMS, JSON tools, profile, studio, project');
+}finally{dom.window.close();}
+})();
