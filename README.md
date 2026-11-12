@@ -1,103 +1,131 @@
 <div align="center">
-
-<img src="docs/hero.jpg" alt="EDELNERA - luxury fashion editorial" width="100%" />
-
-# EDELNERA
-### The art of being yourself.
-
-**A fashion-commerce experience that puts the person first.**  
-Interactive editorial imagery · Modern catalogue · Personal style profile
-
-[**Explore the demo ↗**](https://genocide12.github.io/EDELNERA/) &nbsp;·&nbsp; [**Project source**](https://github.com/Genocide12/EDELNERA) &nbsp;·&nbsp; [**Release notes**](CHANGELOG.md)
-
-<sub>Public demo URL requires GitHub Pages to be enabled for this repository.</sub>
-
+  <img src="docs/hero.jpg" alt="EDELNERA premium fashion concept" width="100%">
+  <h1>E D E L N E R A</h1>
+  <h3>The art of being yourself.</h3>
+  <p>Next-generation fashion atelier · Editorial design · Personalized styling</p>
+  <p>
+    <a href="https://genocide12.github.io/EDELNERA/"><strong>EXPLORE THE DEMO ↗</strong></a>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <a href="https://github.com/Genocide12/EDELNERA/releases"><strong>RELEASES ↗</strong></a>
+    &nbsp;&nbsp;·&nbsp;&nbsp;
+    <a href="https://github.com/Genocide12/EDELNERA/actions"><strong>VISUAL QA ↗</strong></a>
+  </p>
+  <p><sub>⚠️ The demo link becomes available only after GitHub Pages is enabled in this repository's Settings → Pages.</sub></p>
 </div>
 
 ---
 
-## The experience
+## A contemporary fashion experience
 
-A boutique storefront designed for browsing on desktop and iPhone, with a warm, minimal editorial look. A clean interface, lively imagery, and an optional fashion-profile experience.
+EDELNERA is a working, mobile-first **interactive storefront prototype**, not merely a static mockup. Move between pages, customize your style profile, create a local demo order, and manage a sample catalogue in Admin Studio.
 
-| ATELIER / Coat | EDITION / Dress | ACCESSORIES / Bag | TAILORING / Suit |
+| Atelier outerwear | Evening silhouettes | Signature accessory | Modern tailoring |
 |:---:|:---:|:---:|:---:|
-| <img src="docs/atelier-coat.jpg" alt="Coat collection" width="170" /> | <img src="docs/atelier-dress.jpg" alt="Dress collection" width="170" /> | <img src="docs/atelier-bag.jpg" alt="Bag collection" width="170" /> | <img src="docs/atelier-suit.jpg" alt="Suit collection" width="170" /> |
+| <img src="docs/atelier-coat.jpg" width="190" alt="Coat concept"> | <img src="docs/atelier-dress.jpg" width="190" alt="Dress concept"> | <img src="docs/atelier-bag.jpg" width="190" alt="Bag concept"> | <img src="docs/atelier-suit.jpg" width="190" alt="Tailoring concept"> |
 
-*Concept imagery for demonstration only. Photos are illustrative, not a representation of real stock.*
+*Illustrative demo imagery — not a real inventory or an indication of product photography licensing for production commerce.*
 
-### 01 — Three distinct design directions
+## Three creative directions
 
-**Atelier** — refined cream and warm stone. **Noir** — a darker contemporary edition. **Malachite** — deep mineral green and soft natural light.
+**01 / ATELIER** — pale stone, champagne, warm neutral.  
+**02 / NOIR** — contemporary graphite-green, soft light.  
+**03 / MALACHITE** — bright mineral green, botanical refinement.
 
-Switch instantly via the coloured selectors in the top navigation. The chosen theme is stored locally in your browser.
+Select a theme from the ◐ icon in the header or from the three creative cards on the home page. Themes persist in the current browser.
 
-### 02 — Motion with intention
+## Features implemented in v0.3.0
 
-Product photographs animate with a cinematic, multi-stage pan, gentle tilt and light sweep. On desktop, **hover** over a catalogue photograph. On iPhone or other touchscreens, **tap the photograph**; the animation plays for 3.3 seconds. Motion-sensitive users can opt out using their device's reduced-motion setting.
-
-**Current limitation:** these are animated still photographs. They are **not real videos** of models moving or AI-generated garment simulations.
-
-### 03 — Made personal
-
-Upload a face photograph to preview it **beside** an outfit, then enter your height, bust/chest, waist and hip measurements. Photo previews stay in memory in the browser session; measurements persist in that browser's local storage.
-
-**Current limitation:** the site does not replace a model's face or simulate the physical fit of clothing. Actual AI try-on and video generation require a separate consent-based service.
-
----
-
-## What works today
-
-| Area | Current demo behaviour |
+| Area | What works in the demo |
 |---|---|
-| Storefront | Mobile-friendly landing page, editorial categories |
-| Catalogue | Category filtering, interactive animated cards, item details |
-| Cart | Add/remove products and local cart totals |
-| Style directions | Atelier, Noir, Malachite theme switching |
-| Profile | Local measurements, session-only portrait preview |
-| Virtual styling | Outfit image with personal portrait displayed separately |
-| Editor | Edit demo item names and prices in the current browser |
-| Project dossier | Features, implementation notes and reusable master prompt |
+| **Homepage** | Responsive editorial composition, animated hero image, optional real MP4/WebM video URL |
+| **Product gallery** | Category sections and featured collections |
+| **Catalogue** | Search, category filtering, sorting, new/featured labels |
+| **Motion** | 3.3-second animated still photos on desktop hover and iPhone tap, video playback if a URL is configured |
+| **Product pages** | Details, stock indicator, selectable sizes, approximate measurement guidance |
+| **Wishlist** | Save and remove favourites |
+| **Cart** | Quantity, sizes, deletion, stock checks and promo discounts |
+| **Demo checkout** | Create a local sample order without payment, view order in customer profile |
+| **Customer profile** | Height, chest, waist, hip and shoulder measurements saved locally |
+| **Face photo** | Upload portrait-only image, kept only in the current browser tab |
+| **Style Studio** | Face-image positioning over a garment image, adjustable scale and movement preview |
+| **Admin Studio** | Product CRUD, prices, sizes, inventory, featured items and local image upload |
+| **Admin orders** | List sample orders, change their local statuses |
+| **Admin marketing** | Manage demo promo codes |
+| **Admin content** | Hero title, season, announcement, video URL, theme switching |
+| **Data portability** | Import / export JSON; reset demo data |
+| **Project dossier** | Working documentation page, technology overview and reusable master prompt |
 
-## Product boundaries
+**Important boundaries.** The Admin Studio is a **browser-local public demo** without authentication. Editing a product does **not** publish changes for all shoppers. A full product backend, authenticated administration, real checkout, shipping, AI face replacement and true garment fit simulation are **not implemented**. The Style Studio makes a **manual visual composition**; its motion effect is not a generated video of the customer.
 
-This repository is a **static interactive prototype**, not a production e-commerce platform. It does **not** process payments, persist orders on a server, synchronize stock between visitors, provide secure staff authentication, render model videos, or perform actual AI face replacement or virtual try-on. The 'Editor' is a local browser demo, **not an authenticated admin console**.
+### Customer experience
 
-<details>
-<summary><b>Architecture and planned integrations</b></summary>
+1. Browse products → select size → add to cart.
+2. Apply the sample promo code `WELCOME10`.
+3. Create a demo order → see it in Profile / Admin.
+4. Upload a **face portrait only** and save body measurements.
+5. Open Style Studio → place and resize the face over a concept garment image.
 
-<img src="docs/architecture.svg" alt="Static demo architecture and future optional integrations" width="100%" />
+All demo checkout fields can use fictional details. No real payment details are requested.
 
-The current experience runs in HTML, CSS and JavaScript, with browser-local storage for selected preferences and demo data. A production deployment could add an authenticated API, transactional database, media pipeline, privacy controls, commerce backend, and explicit-consent AI image generation.
+### Admin Studio
 
-</details>
+Open **Admin Studio** from the footer. It has **Dashboard**, **Products**, **Orders**, **Promo codes**, **Content & media**, and **Import / export**.
 
----
+Admin product imagery can be provided through a URL or a locally compressed image upload. MP4/WebM direct URLs may be configured per item and for the hero. For public production use, media should be hosted on an owned/CDN storage service under the correct licence. Avoid putting API keys or customer secrets in a static site.
 
-## Run locally
+## Architecture
 
-Open `index.html` in any modern browser. No Node.js install, database, server or paid services are required for the static demo.
+<img src="docs/architecture.svg" alt="Architecture: static demo and planned production extensions" width="100%">
 
-## Publish on GitHub Pages
+**Now:** HTML5 · CSS3 · Vanilla JS · GitHub Pages-compatible static hosting · browser localStorage · no paid server.
 
-In this repository, open **Settings → Pages**, set **Build and deployment / Source** to **Deploy from a branch**, choose **main** + **/(root)**, and press **Save**.
+**Later:** authenticated admin + real product database, inventory/order API, licensed image/video CDN, payment processor, AI avatar generation with explicit consent, measurement-specific size engine, privacy controls, monitoring and security auditing.
 
-Then open **https://genocide12.github.io/EDELNERA/**. It may take a short time for the initial Pages deployment to appear.
+## Quality assurance
 
-## Versioning and releases
+We run GitHub Actions checks on pull requests and main:
 
-See [CHANGELOG.md](CHANGELOG.md). The [release workflow](.github/workflows/release.yml) publishes a GitHub Release when the version in [VERSION](VERSION) changes and the necessary GitHub Actions permissions are available. Release automation does not imply the workflow has already completed successfully.
+- **Interaction smoke tests:** navigation, search/filter logic, wishlist, cart, checkout, sample orders, admin CRUD, media controls, profile and project page.
+- **Visual browser QA:** screenshots at desktop 1440×900 and iPhone-style 390×844 viewports across three themes, catalogue, Admin Studio and Style Studio. Screenshots are attached as workflow artifacts (14-day retention).
 
-## What comes next
+[Open visual QA and preview artifacts ↗](https://github.com/Genocide12/EDELNERA/actions/workflows/visual.yml)
 
-Real garment video; consent-based face replacement; manufacturer-specific size recommendations; backend inventory; authenticated editor; checkout; and automated visual/end-to-end tests.
+## Run
+
+```bash
+# Python's built-in server is enough
+python3 -m http.server 4173
+# open http://localhost:4173
+```
+
+The site does not require a build tool or paid database.
+
+### Publish with GitHub Pages (one-time owner action)
+
+This repository currently needs its initial GitHub Pages activation. Open **Settings → Pages → Build and deployment**, select **Deploy from a branch**, then **main / (root)** and click **Save**.
+
+The public link will then be **https://genocide12.github.io/EDELNERA/**. If it returns 404, Pages is not yet enabled or the initial deployment is still processing.
+
+### GitHub About / Website
+
+The `Website` field under **About** can be edited by a repository administrator. Paste `https://genocide12.github.io/EDELNERA/` when Pages is active. The current GitHub connector does not expose updating repository homepage metadata.
+
+## Versions
+
+- **v0.1.0:** Initial static store concept.
+- **v0.2.0:** Kinetic catalogue, three themes, initial local portrait and project documentation.
+- **v0.3.0:** New full-store demo, local Admin Studio, order lifecycle, media management, personalised style preview and mobile visual QA.
+
+See [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/Genocide12/EDELNERA/releases). Releases are automatically created from the `VERSION` file after a successful push to `main`.
+
+## Presenting the project
+
+The site footer links to **About this project**, including a copyable implementation prompt. Use the project dossier to distinguish current demo functionality from future production architecture.
 
 ---
 
 <div align="center">
-
-**EDELNERA** — *A modern wardrobe, not a costume.*
-
-<sub>Project concept · 2026 · Interactive demonstration</sub>
-
+  <strong>EDELNERA</strong><br>
+  <i>Nobility is being yourself.</i><br>
+  <sub>Concept edition 2026–2027 · Built to be experienced, not just viewed.</sub>
 </div>
