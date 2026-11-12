@@ -1,0 +1,20 @@
+name: EDELNERA · Interaction smoke tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test runner
+        run: npm install --no-save --no-audit --no-fund jsdom@26
+      - name: Verify interactive catalogue and navigation
+        run: node tests/smoke.test.mjs
