@@ -23,7 +23,7 @@ try{
  await desktop.screenshot({path:'artifacts/04-catalog-motion.png',fullPage:true});
  await desktop.goto(base+'#/admin');await desktop.locator('.admin-shell').waitFor();
  await desktop.screenshot({path:'artifacts/05-admin-dashboard.png',fullPage:true});
- await desktop.locator('[data-admin-tab="products"]').click();
+ await desktop.locator('.admin-sidebar [data-admin-tab="products"]').click();
  await desktop.screenshot({path:'artifacts/06-admin-products.png',fullPage:true});
  await desktop.goto(base+'#/studio');await desktop.locator('#studio-stage').waitFor();
  await desktop.screenshot({path:'artifacts/07-studio.png',fullPage:true});
