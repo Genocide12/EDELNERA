@@ -1,4 +1,4 @@
-(function smoke(){
+(async function smoke(){
 const assert=(await import('node:assert/strict')).default;
 const fs=await import('node:fs');
 const {JSDOM,VirtualConsole}=await import('jsdom');
