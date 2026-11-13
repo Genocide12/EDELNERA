@@ -27,8 +27,8 @@ EDELNERA is a working, mobile-first **interactive storefront prototype**, not me
 
 ## Three creative directions
 
-**01 / ATELIER** — warm black, champagne accents and editorial light.  
-**02 / NOIR** — deep graphite, crisp ivory and silver detail.  
+**01 / ATELIER** — warm black, champagne accents and editorial light.
+**02 / NOIR** — deep graphite, crisp ivory and silver detail.
 **03 / MALACHITE** — forest green, mineral highlights and botanical depth.
 
 Select a theme from the ◐ icon in the header or from the three creative cards on the home page. Themes persist in the current browser.
