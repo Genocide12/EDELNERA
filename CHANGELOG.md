@@ -1,5 +1,15 @@
 # EDELNERA — Changelog
 
+## v0.4.0 · 2026-11-13 — Assortment & Product Galleries
+
+**Imported inventory:** 386 women's and 1,012 men's positions from the supplied Word tables, preserving articles, brands, prices, available-size labels and source-table references. Added the formatted workbook to `docs/` and shared temporary product imagery pending real photos.
+
+**Admin editor:** Added preset size checkboxes, with existing source sizes preserved as selectable options.
+
+**Product photos:** Admin Studio accepts multiple JPG/PNG/WebP files (up to six photos per product), compresses and previews them, supports removing photos, and keeps images in the local browser. Catalogue cards and product pages now open an enlarged image viewer with next/previous navigation.
+
+**Scale & quality:** Added 24-item catalogue paging and 50-row admin paging for the imported inventory. Extended smoke and browser tests for the inventory, multi-photo admin workflow and enlarged gallery.
+
 ## v0.3.0 · 2026-11-13 — The Atelier 2027 Experience
 
 **A complete new interactive storefront:** redesigned responsive layout and three live themes (Atelier, Noir, Malachite), navigation, catalogue search, filtering and sorting, animated hover/tap editorial photography, optional hosted video support, product details and size selection, favourites, quantity-aware cart and promo codes.

@@ -4,7 +4,7 @@ const STORAGE='edelnera:atelier-v3', PORTRAIT_MAX=8*1024*1024;
 const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Number(n)||0)+' ₽';
 const x=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asURL=v=>{let u=String(v||'').trim();return /^(https:\/\/|docs\/|assets\/|data:image\/(png|jpeg|webp);base64,|blob:)/i.test(u)?u:'';};
-const image=p=>asURL(p?.image)||'docs/atelier-coat.jpg';
+const image=p=>asURL(p?.images?.[0])||asURL(p?.image)||'docs/atelier-coat.jpg';
 const baseProducts=[
 {id:'coat-atelier',name:'Atelier Wool Coat',category:'Пальто',price:24900,compare:28900,stock:8,sizes:['XS','S','M','L'],image:'docs/atelier-coat.jpg',video:'',badge:'NEW EDITION',color:'Тёплый песок',material:'Шерсть / эластан',description:'Продуманный силуэт и мягкая линия плеча. Пальто, которое выбирает вас, а не наоборот.',featured:true},
 {id:'dress-muse',name:'Muse Evening Dress',category:'Платья',price:18700,compare:0,stock:12,sizes:['XS','S','M','L','XL'],image:'docs/atelier-dress.jpg',video:'',badge:'EDITOR’S PICK',color:'Натуральный',material:'Вискоза / шёлк',description:'Лёгкая пластика ткани и чистая архитектура линий. Для важных моментов без лишних слов.',featured:true},
@@ -15,10 +15,11 @@ const baseProducts=[
 {id:'bag-classic',name:'EDELNERA Small Tote',category:'Аксессуары',price:9800,compare:0,stock:13,sizes:['ONE SIZE'],image:'docs/atelier-bag.jpg',video:'',badge:'',color:'Шоколад',material:'Экокожа',description:'Всё необходимое, без ничего лишнего.',featured:false},
 {id:'suit-studio',name:'Studio Blazer',category:'Костюмы',price:15400,compare:0,stock:7,sizes:['XS','S','M','L','XL'],image:'docs/atelier-suit.jpg',video:'',badge:'',color:'Тёмно-зелёный',material:'Твил',description:'Пластичная посадка, выразительные детали.',featured:false}
 ];
-const seed=()=>({products:JSON.parse(JSON.stringify(baseProducts)),cart:[],favorites:[],orders:[],coupons:[{code:'WELCOME10',discount:10,active:true}],profile:{height:'',chest:'',waist:'',hips:'',shoulders:'',name:''},settings:{season:'AUTUMN / WINTER 2026—27',heroTitle:'Искусство\nбыть собой.',heroSubtitle:'Современная элегантность, созданная вокруг вашей индивидуальности.',heroVideo:'',announcement:'THE EDELNERA EDITION'},theme:'atelier'});
-function load(){try{const raw=localStorage.getItem(STORAGE);if(!raw)return seed();const a=JSON.parse(raw);const s=seed();if(a&&typeof a==='object'){for(const key of ['products','cart','favorites','orders','coupons'])if(Array.isArray(a[key]))s[key]=a[key];if(a.profile&&typeof a.profile==='object')s.profile={...s.profile,...a.profile};if(a.settings&&typeof a.settings==='object')s.settings={...s.settings,...a.settings};if(['atelier','noir','malachite'].includes(a.theme))s.theme=a.theme;}return s}catch(e){return seed()}}
+const inventory=Array.isArray(window.edelneraInventory)?window.edelneraInventory:[];
+const seed=()=>({products:[...JSON.parse(JSON.stringify(baseProducts)),...inventory],cart:[],favorites:[],orders:[],coupons:[{code:'WELCOME10',discount:10,active:true}],profile:{height:'',chest:'',waist:'',hips:'',shoulders:'',name:''},settings:{season:'AUTUMN / WINTER 2026—27',heroTitle:'Искусство\nбыть собой.',heroSubtitle:'Современная элегантность, созданная вокруг вашей индивидуальности.',heroVideo:'',announcement:'THE EDELNERA EDITION',inventoryImported:true},theme:'atelier'});
+function load(){try{const raw=localStorage.getItem(STORAGE);if(!raw)return seed();const a=JSON.parse(raw);const s=seed();if(a&&typeof a==='object'){for(const key of ['products','cart','favorites','orders','coupons'])if(Array.isArray(a[key]))s[key]=a[key];if(a.profile&&typeof a.profile==='object')s.profile={...s.profile,...a.profile};if(a.settings&&typeof a.settings==='object')s.settings={...s.settings,...a.settings};if(Array.isArray(a.products)&&!a.settings?.inventoryImported){const seen=new Set(a.products.map(p=>String(p.id)));s.products=[...a.products,...inventory.filter(p=>!seen.has(String(p.id)))];s.settings.inventoryImported=true;}if(['atelier','noir','malachite'].includes(a.theme))s.theme=a.theme;}return s}catch(e){return seed()}}
 let db=load();
-const view={route:'home',filter:'Все',sort:'featured',search:'',selectedSize:'M',adminTab:'dashboard',editId:null,pick:db.products[0]?.id,face:null,faceX:40,faceY:10,faceScale:1,motion:false,uploadedImage:null,appliedPromo:'',orderDone:null,adminSearch:'',videoPreview:null};
+const view={route:'home',filter:'Все',sort:'featured',search:'',selectedSize:'M',adminTab:'dashboard',editId:null,pick:db.products[0]?.id,face:null,faceX:40,faceY:10,faceScale:1,motion:false,uploadedImages:[],quickIndex:0,quickId:null,catalogPage:0,adminPage:0,appliedPromo:'',orderDone:null,adminSearch:'',videoPreview:null};
 const el=id=>document.getElementById(id);
 const product=id=>db.products.find(p=>p.id===id);
 const categories=()=>['Все',...new Set(db.products.map(p=>p.category).filter(Boolean))];
@@ -44,6 +45,7 @@ const video=asURL(p.video);
 return `<article class="product-card" data-id="${x(p.id)}">
  <div class="product-media" tabindex="0" role="button" data-action="media" data-id="${x(p.id)}" aria-label="Оживить изображение: ${x(p.name)}">
  ${imgTag(p)}${video?`<video playsinline muted loop preload="none" src="${x(video)}" aria-label="Видео товара"></video>`:''}
+ <button class="product-zoom" type="button" data-action="quick-view" data-id="${x(p.id)}" aria-label="Открыть фото товара крупнее: ${x(p.name)}">УВЕЛИЧИТЬ ФОТО ↗</button>
  <span class="media-shimmer"></span><span class="media-progress"></span><span class="media-prompt">${video?'▶ WATCH MOTION':'✦ TOUCH TO ANIMATE'}</span>
  ${p.badge?`<span class="product-badge">${x(p.badge)}</span>`:''}
  </div><button class="wish ${fav?'active':''}" type="button" aria-label="${fav?'Убрать из избранного':'В избранное'}" data-action="favorite" data-id="${x(p.id)}">${iconHeart(fav)}</button>
@@ -52,6 +54,7 @@ return `<article class="product-card" data-id="${x(p.id)}">
  </article>`;
 }
 function cards(arr){return arr.length?`<div class="grid-products" id="catalog-grid">${arr.map(card).join('')}</div>`:empty('Ничего не найдено','Попробуйте другую категорию или запрос.','catalog','Открыть каталог');}
+function catalogArea(arr){if(!arr.length)return cards(arr);const perPage=24,total=Math.ceil(arr.length/perPage);view.catalogPage=Math.min(view.catalogPage,total-1);const start=view.catalogPage*perPage;return `${cards(arr.slice(start,start+perPage))}<div class="catalog-pagination"><button class="btn outline small" data-action="catalog-page" data-delta="-1" ${view.catalogPage===0?'disabled':''}>← НАЗАД</button><span class="muted small">${start+1}–${Math.min(start+perPage,arr.length)} из ${arr.length}</span><button class="btn outline small" data-action="catalog-page" data-delta="1" ${view.catalogPage===total-1?'disabled':''}>ЕЩЁ →</button></div>`;}
 function empty(title,description,go='catalog',label='В каталог') {return `<div class="empty"><div class="kicker">EDELNERA / NO RESULTS</div><h2>${x(title)}</h2><p class="muted">${x(description)}</p><a class="btn" href="${path(go)}">${x(label)}</a></div>`;}
 function home(){
 const heroVideo=asURL(db.settings.heroVideo);
@@ -76,7 +79,7 @@ return `<section class="hero">
 }
 function filteredProducts(){
 let arr=[...db.products];if(view.filter!=='Все')arr=arr.filter(p=>p.category===view.filter);
-if(view.search.trim()){const q=view.search.toLocaleLowerCase('ru');arr=arr.filter(p=>[p.name,p.category,p.color,p.description].some(v=>String(v||'').toLocaleLowerCase('ru').includes(q)));}
+if(view.search.trim()){const q=view.search.toLocaleLowerCase('ru');arr=arr.filter(p=>[p.name,p.category,p.color,p.description,p.sku,p.brand].some(v=>String(v||'').toLocaleLowerCase('ru').includes(q)));}
 if(view.sort==='price-asc')arr.sort((a,b)=>a.price-b.price);
 if(view.sort==='price-desc')arr.sort((a,b)=>b.price-a.price);
 if(view.sort==='name')arr.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
@@ -89,7 +92,7 @@ return `${pageHeader('COLLECTION / 2027','Коллекция.','Каждая в�
 <section class="container"><div class="strip"><div class="filters">${categories().map(c=>`<button class="filter-pill ${c===view.filter?'active':''}" data-action="filter" data-value="${x(c)}">${x(c)}</button>`).join('')}</div><span class="muted tiny" id="item-count">${arr.length} товаров</span></div>
 <div class="catalog-controls"><input id="catalog-search" class="field site-input" type="search" placeholder="Поиск по коллекции..." value="${x(view.search)}" aria-label="Поиск по каталогу">
 <label class="small">Сортировка <select class="field" id="catalog-sort" style="margin-left:9px;width:auto;min-width:180px"><option value="featured" ${view.sort==='featured'?'selected':''}>Рекомендованные</option><option value="price-asc" ${view.sort==='price-asc'?'selected':''}>Сначала дешевле</option><option value="price-desc" ${view.sort==='price-desc'?'selected':''}>Сначала дороже</option><option value="name" ${view.sort==='name'?'selected':''}>По названию</option></select></label></div>
-<div id="catalog-area">${cards(arr)}</div></section>`;
+<div id="catalog-area">${catalogArea(arr)}</div></section>`;
 }
 function detail(id){
 const p=product(id);if(!p)return empty('Товар не найден','Эта модель отсутствует в текущем каталоге.');
@@ -97,8 +100,8 @@ const sizes=Array.isArray(p.sizes)&&p.sizes.length?p.sizes:['ONE SIZE'];
 if(!sizes.includes(view.selectedSize))view.selectedSize=sizes[0];
 const rec=recommend(p);
 return `<div class="container"><div class="breadcrumb"><a href="#/">Главная</a> / <a href="#/catalog">Коллекция</a> / ${x(p.category)}</div>
-<div class="detail-grid"><div class="detail-photo">${imgTag(p)}${asURL(p.video)?`<button class="btn small" type="button" data-action="product-video" data-id="${x(p.id)}" style="position:relative;bottom:56px;left:20px">▶ Посмотреть видео модели</button>`:''}</div>
-<div class="detail-side"><div class="kicker">${x(p.category)} / EDELNERA EDITION</div><h1>${x(p.name)}</h1><div class="detail-price">${money(p.price)} ${p.compare>p.price?`<span class="strike">${money(p.compare)}</span>`:''}</div>
+<div class="detail-grid"><div class="detail-photo" data-action="quick-view" data-id="${x(p.id)}" role="button" tabindex="0" aria-label="Открыть фотографии товара крупнее">${imgTag(p)}${asURL(p.video)?`<button class="btn small" type="button" data-action="product-video" data-id="${x(p.id)}" style="position:relative;bottom:56px;left:20px">▶ Посмотреть видео модели</button>`:''}<span class="detail-zoom-hint">ОТКРЫТЬ ФОТОГАЛЕРЕЮ ↗</span></div>
+<div class="detail-side"><div class="kicker">${x(p.brand||p.category)}${p.sku?` / ${x(p.sku)}`:' / EDELNERA EDITION'}</div><h1>${x(p.name)}</h1><div class="detail-price">${money(p.price)} ${p.compare>p.price?`<span class="strike">${money(p.compare)}</span>`:''}</div>
 <p class="muted">${x(p.description)}</p><div class="info-table"><div><span>Материал</span><strong>${x(p.material)}</strong></div><div><span>Цвет</span><strong>${x(p.color)}</strong></div><div><span>На складе</span><strong>${Math.max(0,Number(p.stock)||0)} шт. (демо)</strong></div></div>
 <div class="spread"><strong class="small">ВЫБЕРИТЕ РАЗМЕР</strong><a class="tiny muted" href="#/profile">Мои мерки ↗</a></div><div class="size-row">${sizes.map(size=>`<button class="size-pill ${view.selectedSize===size?'selected':''}" data-action="size" data-value="${x(size)}">${x(size)}</button>`).join('')}</div>
 ${rec?`<div class="notice"><strong>Ориентир по вашим меркам:</strong> ${x(rec)}. Проверьте таблицу конкретного производителя: это демонстрационный расчёт.</div>`:''}
@@ -194,7 +197,7 @@ if(view.adminTab==='dashboard'){
  <div class="panel" style="margin-top:18px"><div class="kicker">RECENT DEMO ORDERS</div><div style="margin-top:18px">${ordersMarkup(db.orders.slice(0,3),true)}</div></div>`;
 }else if(view.adminTab==='products'){
  content=`<div class="spread" style="margin-bottom:20px"><input class="field site-input" type="search" id="admin-search" placeholder="Найти товар..." value="${x(view.adminSearch)}"><button class="btn" data-action="product-new">+ НОВЫЙ ТОВАР</button></div>
- <div class="table-wrap"><table class="admin-table"><thead><tr><th>ФОТО</th><th>НАИМЕНОВАНИЕ</th><th>КАТЕГОРИЯ</th><th>ЦЕНА</th><th>ОСТАТОК</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody id="admin-product-rows">${adminRows()}</tbody></table></div>`;
+ <div class="table-wrap"><table class="admin-table"><thead><tr><th>ФОТО</th><th>НАИМЕНОВАНИЕ / АРТИКУЛ</th><th>КАТЕГОРИЯ</th><th>ЦЕНА</th><th>ОСТАТОК</th><th>ДЕЙСТВИЯ</th></tr></thead><tbody id="admin-product-rows">${adminRows()}</tbody></table></div><div class="catalog-pagination" id="admin-pagination">${adminPagination()}</div>`;
 }else if(view.adminTab==='orders'){
  content=`<div class="panel"><div class="kicker">DEMONSTRATION ORDER MANAGEMENT</div><p class="file-note">Изменение статуса влияет только на заказы, созданные в этом браузере. Сервис доставки и уведомления не подключены.</p>${ordersMarkup(db.orders,true)}</div>`;
 }else if(view.adminTab==='promos'){
@@ -219,8 +222,10 @@ return `<section class="container page-intro" style="padding-bottom:0"><div clas
  <div class="admin-top"><div><div class="kicker">STUDIO ADMIN / ${x(view.adminTab)}</div><h1 style="margin:13px 0 0">${x(title)}</h1></div><a class="btn outline small" href="#/catalog">Смотреть витрину ↗</a></div>
  <div class="notice" style="margin-bottom:22px"><strong>ЛОКАЛЬНАЯ ДЕМО-ПАНЕЛЬ.</strong> Это не защищённая админка с общими данными: любой посетитель видит эту демоверсию, а изменения действуют только в его браузере. Настоящие заказы и платежи отключены.</div>${content}</div></div></section>`;
 }
+function adminMatches(){return db.products.filter(p=>`${p.name} ${p.category} ${p.brand||''} ${p.sku||''}`.toLocaleLowerCase('ru').includes(view.adminSearch.toLocaleLowerCase('ru')))}
+function adminPagination(){const n=adminMatches().length,pages=Math.max(1,Math.ceil(n/50));view.adminPage=Math.min(view.adminPage,pages-1);const start=n?view.adminPage*50+1:0,end=Math.min(n,(view.adminPage+1)*50);return `<button class="btn outline small" data-action="admin-page" data-delta="-1" ${view.adminPage===0?'disabled':''}>← НАЗАД</button><span class="muted small">${start}–${end} из ${n}</span><button class="btn outline small" data-action="admin-page" data-delta="1" ${view.adminPage>=pages-1?'disabled':''}>ЕЩЁ →</button>`;}
 function adminRows(){
-return db.products.filter(p=>`${p.name} ${p.category}`.toLowerCase().includes(view.adminSearch.toLowerCase())).map(p=>`<tr><td>${imgTag(p)}</td><td><b>${x(p.name)}</b><div class="muted tiny">${x(p.id)}</div></td><td>${x(p.category)}</td><td>${money(p.price)}</td><td>${Number(p.stock)||0}</td><td><div class="table-actions"><button data-action="product-edit" data-id="${x(p.id)}">Изменить</button><button data-action="product-delete" data-id="${x(p.id)}">×</button></div></td></tr>`).join('')||'<tr><td colspan="6">Товар не найден</td></tr>';
+const matches=adminMatches(),start=view.adminPage*50;return matches.slice(start,start+50).map(p=>`<tr><td>${imgTag(p)}</td><td><b>${x(p.name)}</b><div class="muted tiny">${x([p.brand,p.sku].filter(Boolean).join(' · ')||p.id)}</div></td><td>${x(p.category)}</td><td>${money(p.price)}</td><td>${Number(p.stock)||0}</td><td><div class="table-actions"><button data-action="product-edit" data-id="${x(p.id)}">Изменить</button><button data-action="product-delete" data-id="${x(p.id)}">×</button></div></td></tr>`).join('')||'<tr><td colspan="6">Товар не найден</td></tr>';
 }
 function project(){
 const prompt=`Ты — команда senior full-stack, UI/UX, QA, fashion creative и security architects. Создай EDELNERA, премиальную интерактивную платформу fashion e-commerce 2027. Три переключаемых дизайн-направления Atelier (светлый), Noir (контрастный) и Malachite (светлый малахит). Живые фото и видео моделей: hover на ПК, tap на iPhone, reduced-motion и fallback. Каталог, фильтры, размерные таблицы, избранное, корзина, промокоды, заказы, кабинет, настоящая защищённая админка с CRUD, загрузкой медиа, импортом и экспортом данных. По желанию пользователя — только фото лица и мерки тела, затем AI-аватар, реалистичная примерка одежды, фотографии и видео с явным согласием. Включи backend с RBAC, приватностью, обработкой изображений, тестированием, мониторингом, аудитом и публикацией. Никаких выдуманных интеграций: не выдавай локальные прототипы, CSS-анимации и демонстрационные расчёты за AI, платежи или серверные функции. Отдельная страница с описанием проекта, функциями, архитектурой и копируемым промптом. GitHub Pages для публичного демо и понятная система релизов.`;
@@ -273,27 +278,34 @@ media.classList.remove('is-playing');void media.offsetWidth;media.classList.add(
 if(video){video.classList.add('is-ready');video.play().catch(()=>{});}
 media._motionTimer=setTimeout(()=>{media.classList.remove('is-playing');if(video&&!media.matches(':hover')){video.pause();video.currentTime=0;video.classList.remove('is-ready')}},3300);
 }
-function modal(content){
-el('modal-root').innerHTML=`<div class="modal-backdrop" data-action="modal-backdrop"><section role="dialog" aria-modal="true" class="modal" aria-label="Редактирование EDELNERA"><button class="modal-close" data-action="modal-close" aria-label="Закрыть">×</button>${content}</section></div>`;
+function modal(content,extraClass=''){
+el('modal-root').innerHTML=`<div class="modal-backdrop" data-action="modal-backdrop"><section role="dialog" aria-modal="true" class="modal ${x(extraClass)}" aria-label="EDELNERA"><button class="modal-close" data-action="modal-close" aria-label="Закрыть">×</button>${content}</section></div>`;
 document.body.classList.add('modal-open');el('modal-root').querySelector('.modal-close').focus();
 }
-function closeModal(){el('modal-root').innerHTML='';document.body.classList.remove('modal-open');view.uploadedImage=null;}
+function gallery(p){return Array.isArray(p?.images)&&p.images.length?p.images.map(asURL).filter(Boolean):[image(p)]}
+function productQuickView(id){const p=product(id);if(!p)return;view.quickId=id;view.quickIndex=0;const photos=gallery(p);modal(`<div class="quick-view"><div class="quick-gallery"><button class="gallery-arrow" data-action="quick-move" data-delta="-1" aria-label="Предыдущее фото" ${photos.length<2?'hidden':''}>‹</button><img id="quick-photo" src="${x(photos[0])}" alt="${x(p.name)}, фото 1 из ${photos.length}"><button class="gallery-arrow" data-action="quick-move" data-delta="1" aria-label="Следующее фото" ${photos.length<2?'hidden':''}>›</button><span id="quick-photo-count" class="gallery-count">1 / ${photos.length}</span></div><div class="quick-info"><div class="kicker">${x(p.category)} / EDELNERA</div><h2>${x(p.name)}</h2><div class="detail-price">${money(p.price)}</div><p class="muted">${x(p.description||'Выразительная форма и продуманные детали.')}</p><div class="field-hint">Фото ${photos.length>1?'1 из '+photos.length:'товара'} · ${Math.max(0,Number(p.stock)||0)} шт. в демо-остатке</div><div class="quick-actions"><a class="btn outline" href="${path('product/'+encodeURIComponent(p.id))}" data-action="modal-close">ПОДРОБНЕЕ ↗</a><button class="btn" data-action="quick-add" data-id="${x(p.id)}" ${p.stock<=0?'disabled':''}>В КОРЗИНУ</button></div></div></div>`,'quick-view-modal');}
+function quickViewMove(delta){const p=product(view.quickId);if(!p)return;const photos=gallery(p);view.quickIndex=(view.quickIndex+Number(delta)+photos.length)%photos.length;const img=el('quick-photo');if(img){img.src=photos[view.quickIndex];img.alt=`${p.name}, фото ${view.quickIndex+1} из ${photos.length}`;}const count=el('quick-photo-count');if(count)count.textContent=`${view.quickIndex+1} / ${photos.length}`;}
+function closeModal(){el('modal-root').innerHTML='';document.body.classList.remove('modal-open');view.uploadedImages=[];}
+function uploadedPreview(){return view.uploadedImages.map((src,i)=>`<div class="admin-image-thumb"><img src="${x(src)}" alt="Фото ${i+1}"><button type="button" data-action="remove-uploaded-image" data-index="${i}" aria-label="Удалить фото ${i+1}">×</button><span>${i===0?'ОСНОВНОЕ':`ФОТО ${i+1}`}</span></div>`).join('')||'<span class="field-hint">Загруженные фото появятся здесь.</span>';}
 function productModal(id){
-const p=id?product(id):null;const data=p||{id:'',name:'',category:'Пальто',price:'',compare:'',stock:1,sizes:['S','M','L'],color:'',material:'',description:'',image:'docs/atelier-coat.jpg',video:'',badge:'',featured:false};
+const p=id?product(id):null;const data=p||{id:'',sku:'',brand:'',name:'',category:'Пальто',price:'',compare:'',stock:1,sizes:['S','M','L'],color:'',material:'',description:'',image:'docs/atelier-coat.jpg',video:'',badge:'',featured:false};
+const sizeChoices=[...new Set(['XXS','XS','S','M','L','XL','XXL','34','36','38','40','42','44','46','48','50','52','54','56','58','ONE SIZE',...(data.sizes||[])])];
+view.uploadedImages=p?gallery(p).slice(0,6):[];
 modal(`<div class="kicker">EDELNERA / CATALOGUE EDITOR</div><h2 style="margin:14px 0 25px">${p?'Изменить товар.':'Новый товар.'}</h2>
 <form id="product-form"><input name="id" type="hidden" value="${x(data.id)}">
 <div class="grid-two"><div class="field-group"><label class="field-label">Название<input class="field" name="name" maxlength="100" value="${x(data.name)}" required></label></div>
 <div class="field-group"><label class="field-label">Категория<input class="field" name="category" list="product-categories" maxlength="70" value="${x(data.category)}" required></label><datalist id="product-categories">${categories().slice(1).map(c=>`<option value="${x(c)}">`).join('')}</datalist></div></div>
+<div class="grid-two"><label class="field-group"><span class="field-label">Артикул</span><input class="field" name="sku" maxlength="80" value="${x(data.sku||'')}"></label><label class="field-group"><span class="field-label">Бренд</span><input class="field" name="brand" maxlength="80" value="${x(data.brand||'')}"></label></div>
 <div class="grid-three"><label class="field-group"><span class="field-label">Цена, ₽</span><input class="field" type="number" name="price" min="0" value="${x(data.price)}" required></label>
 <label class="field-group"><span class="field-label">Старая цена, ₽</span><input class="field" type="number" name="compare" min="0" value="${x(data.compare)}"></label>
 <label class="field-group"><span class="field-label">Остаток, шт.</span><input class="field" type="number" name="stock" min="0" value="${x(data.stock)}"></label></div>
 <div class="grid-two"><label class="field-group"><span class="field-label">Цвет</span><input class="field" name="color" maxlength="80" value="${x(data.color)}"></label>
 <label class="field-group"><span class="field-label">Состав</span><input class="field" name="material" maxlength="100" value="${x(data.material)}"></label></div>
-<div class="grid-two"><label class="field-group"><span class="field-label">Размеры через запятую</span><input class="field" name="sizes" maxlength="150" value="${x((data.sizes||[]).join(', '))}"></label>
+<div class="grid-two"><fieldset class="field-group size-picker"><legend class="field-label">Доступные размеры — отметьте нужные</legend><div class="size-options-admin">${sizeChoices.map(size=>`<label><input type="checkbox" name="sizes" value="${x(size)}" ${(data.sizes||[]).includes(size)?'checked':''}> ${x(size)}</label>`).join('')}</div></fieldset>
 <label class="field-group"><span class="field-label">Плашка на фото</span><input class="field" name="badge" maxlength="25" value="${x(data.badge)}"></label></div>
 <label class="field-group"><span class="field-label">Описание</span><textarea class="field" rows="3" name="description" maxlength="600">${x(data.description)}</textarea></label>
-<label class="field-group"><span class="field-label">URL изображения (HTTPS или путь docs/...)</span><input class="field" name="image" value="${x(data.image)}" placeholder="docs/atelier-coat.jpg"></label>
-<div class="field-group"><label class="field-label">Или загрузите свою фотографию</label><input type="file" id="admin-image" accept="image/png,image/jpeg,image/webp" class="field"><div class="field-hint">Фото будет сжато и сохранено локально; другие пользователи его не увидят. Для общего каталога нужен сервер.</div></div>
+<label class="field-group"><span class="field-label">Основное фото (HTTPS или путь docs/...)</span><input class="field" name="image" value="${x(image(data))}" placeholder="docs/atelier-coat.jpg"></label>
+<div class="field-group"><span class="field-label">Фотографии товара — можно выбрать несколько</span><label class="btn outline small file-label">＋ ДОБАВИТЬ ФОТО<input type="file" id="admin-images" accept="image/png,image/jpeg,image/webp" multiple></label><div class="field-hint">До 6 изображений, каждое до 8 МБ. Фото сжимаются и сохраняются в этом браузере; другим посетителям они не видны.</div><div id="admin-image-preview" class="admin-image-preview">${uploadedPreview()}</div></div>
 <label class="field-group"><span class="field-label">Видео товара — прямой URL MP4/WebM</span><input class="field" type="url" name="video" value="${x(data.video)}" placeholder="https://.../model.mp4"></label>
 <label class="small"><input type="checkbox" name="featured" ${data.featured?'checked':''}> Показывать в подборке на главной</label>
 <div class="spread" style="margin-top:25px;flex-wrap:wrap"><button class="btn" type="submit">${p?'СОХРАНИТЬ ТОВАР':'ДОБАВИТЬ ТОВАР'}</button><button class="btn outline" type="button" data-action="modal-close">Отмена</button></div></form>`);
@@ -311,12 +323,12 @@ notice('Файл экспорта подготовлен');
 }
 function safeImported(o){
 if(!o||o.format!=='EDELNERA-export-v3'||!o.data||!Array.isArray(o.data.products)||!Array.isArray(o.data.orders))throw Error('Это не экспорт EDELNERA версии 3');
-if(o.data.products.length>500||o.data.orders.length>5000)throw Error('Экспорт слишком большой');
+if(o.data.products.length>2000||o.data.orders.length>5000)throw Error('Экспорт слишком большой');
 const s=seed();s.products=o.data.products.filter(p=>p&&typeof p.name==='string'&&typeof p.id==='string').map(p=>({
- id:String(p.id).slice(0,80),name:String(p.name).slice(0,100),category:String(p.category||'Другое').slice(0,70),
+ id:String(p.id).slice(0,80),name:String(p.name).slice(0,100),category:String(p.category||'Другое').slice(0,70),sku:String(p.sku||'').slice(0,80),brand:String(p.brand||'').slice(0,80),gender:String(p.gender||'').slice(0,20),sourceTable:Math.max(0,Number(p.sourceTable)||0),
  price:Math.max(0,Number(p.price)||0),compare:Math.max(0,Number(p.compare)||0),stock:Math.max(0,Math.floor(Number(p.stock)||0)),
  sizes:Array.isArray(p.sizes)?p.sizes.slice(0,20).map(v=>String(v).slice(0,20)):['ONE SIZE'],
- image:asURL(p.image)||'docs/atelier-coat.jpg',video:asURL(p.video),badge:String(p.badge||'').slice(0,25),
+ image:asURL(p.image)||'docs/atelier-coat.jpg',images:Array.isArray(p.images)?p.images.slice(0,6).map(asURL).filter(Boolean):[],video:asURL(p.video),badge:String(p.badge||'').slice(0,25),
  color:String(p.color||'').slice(0,80),material:String(p.material||'').slice(0,100),description:String(p.description||'').slice(0,600),featured:!!p.featured
 }));
 s.orders=o.data.orders.slice(0,5000).filter(p=>p&&Array.isArray(p.items)&&typeof p.id==='string');
@@ -336,8 +348,13 @@ if(act==='announcement-close'){el('announcement').remove();return;}
 if(act==='theme-popover'){el('theme-popover').hidden=!el('theme-popover').hidden;return;}
 if(act==='search-focus'){nav('catalog');setTimeout(()=>el('catalog-search')?.focus(),0);return;}
 if(act==='favorite'){db.favorites=db.favorites.includes(id)?db.favorites.filter(k=>k!==id):[...db.favorites,id];save();render();notice(db.favorites.includes(id)?'Добавлено в избранное':'Убрано из избранного');return;}
-if(act==='filter'){view.filter=val;render();return;}
+if(act==='filter'){view.filter=val;view.catalogPage=0;render();return;}
+if(act==='catalog-page'){view.catalogPage=Math.max(0,view.catalogPage+Number(button.dataset.delta));const area=el('catalog-area');if(area)area.innerHTML=catalogArea(filteredProducts());return;}
+if(act==='admin-page'){view.adminPage=Math.max(0,view.adminPage+Number(button.dataset.delta));const rows=el('admin-product-rows');if(rows)rows.innerHTML=adminRows();const page=el('admin-pagination');if(page)page.innerHTML=adminPagination();return;}
 if(act==='media'){animatedMedia(button);return;}
+if(act==='quick-view'){productQuickView(id);return;}
+if(act==='quick-move'){quickViewMove(button.dataset.delta);return;}
+if(act==='remove-uploaded-image'){view.uploadedImages.splice(Number(button.dataset.index),1);const main=el('product-form')?.elements.namedItem('image');if(main&&Number(button.dataset.index)===0)main.value=view.uploadedImages[0]||'docs/atelier-coat.jpg';const preview=el('admin-image-preview');if(preview)preview.innerHTML=uploadedPreview();return;}
 if(act==='size'){view.selectedSize=val;render();return;}
 if(act==='quick-add'||act==='add'){add(id,view.selectedSize);return;}
 if(act==='share-product'){const url=location.origin+location.pathname+path('product/'+id);if(navigator.share)navigator.share({url,title:product(id)?.name}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>notice('Ссылка на товар скопирована')).catch(()=>notice('Не удалось скопировать'));return;}
@@ -366,6 +383,7 @@ const button=e.target.closest('[data-action]');if(button){if(button.dataset.acti
 document.addEventListener('keydown',e=>{
 if(e.key==='Escape')closeModal();
 const t=e.target.closest?.('.product-media');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();animatedMedia(t);}
+const z=e.target.closest?.('.detail-photo[role="button"]');if(z&&(e.key==='Enter'||e.key===' ')){e.preventDefault();productQuickView(z.dataset.id);}
 });
 document.addEventListener('mouseover',e=>{
 if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -376,23 +394,23 @@ document.addEventListener('mouseout',e=>{
 const m=e.target.closest('.product-media');if(m&&m.querySelector('video')&&!m.contains(e.relatedTarget)){const v=m.querySelector('video');v.pause();v.classList.remove('is-ready');}
 });
 document.addEventListener('input',e=>{
-if(e.target.id==='catalog-search'){view.search=e.target.value;const area=el('catalog-area');if(area)area.innerHTML=cards(filteredProducts());const count=el('item-count');if(count)count.textContent=filteredProducts().length+' товаров';}
-if(e.target.id==='admin-search'){view.adminSearch=e.target.value;const tbody=el('admin-product-rows');if(tbody)tbody.innerHTML=adminRows();}
+if(e.target.id==='catalog-search'){view.search=e.target.value;view.catalogPage=0;const area=el('catalog-area');if(area)area.innerHTML=catalogArea(filteredProducts());const count=el('item-count');if(count)count.textContent=filteredProducts().length+' товаров';}
+if(e.target.id==='admin-search'){view.adminSearch=e.target.value;view.adminPage=0;const tbody=el('admin-product-rows');if(tbody)tbody.innerHTML=adminRows();const page=el('admin-pagination');if(page)page.innerHTML=adminPagination();}
 const slider=e.target;if(['face-x','face-y','face-scale'].includes(slider.id)){view[{'face-x':'faceX','face-y':'faceY','face-scale':'faceScale'}[slider.id]]=Number(slider.value);const st=el('studio-stage');if(st){st.style.setProperty('--face-x',view.faceX+'%');st.style.setProperty('--face-y',view.faceY+'%');st.style.setProperty('--face-scale',view.faceScale)}}
 });
-document.addEventListener('change',e=>{
-if(e.target.id==='catalog-sort'){view.sort=e.target.value;render();}
+document.addEventListener('change',async e=>{
+if(e.target.id==='catalog-sort'){view.sort=e.target.value;view.catalogPage=0;render();}
 if(e.target.id==='studio-item'){view.pick=e.target.value;render();}
 if(e.target.dataset.orderStatus){const o=db.orders.find(o=>o.id===e.target.dataset.orderStatus);if(o)o.status=e.target.value;save();render();}
 if(e.target.id==='face-file'){const file=e.target.files?.[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>PORTRAIT_MAX){notice('Выберите JPG/PNG/WebP до 8 МБ');return}resizeImage(file,v=>{view.face=v;render();notice('Портрет загружен только в эту вкладку')});}
-if(e.target.id==='admin-image'){const file=e.target.files?.[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>PORTRAIT_MAX){notice('Выберите JPG/PNG/WebP до 8 МБ');return}resizeImage(file,v=>{view.uploadedImage=v;notice('Фото подготовлено. Теперь сохраните товар.')});}
+if(e.target.id==='admin-images'){const files=[...(e.target.files||[])];if(!files.length)return;const valid=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=PORTRAIT_MAX);if(valid.length!==files.length)notice('Пропущены файлы: выберите JPG/PNG/WebP до 8 МБ каждый');const room=Math.max(0,6-view.uploadedImages.length);if(valid.length>room)notice('В карточке можно сохранить максимум 6 фото');const chosen=valid.slice(0,room);for(const file of chosen){await new Promise(resolve=>resizeImage(file,src=>{view.uploadedImages.push(src);resolve()}));}const preview=el('admin-image-preview');if(preview)preview.innerHTML=uploadedPreview();if(chosen.length)notice(`Подготовлено фото: ${chosen.length}. Сохраните товар, чтобы оставить их в карточке.`);e.target.value='';}
 if(e.target.id==='import-json'){const f=e.target.files?.[0];if(!f)return;if(f.size>7*1024*1024){notice('JSON должен быть не более 7 МБ');return}const rd=new FileReader();rd.onload=()=>{try{const next=safeImported(JSON.parse(rd.result));if(!confirm('Заменить локальные данные импортированными?'))return;db=next;view.pick=db.products[0]?.id;view.appliedPromo='';save();render();notice('Каталог импортирован')}catch(err){notice('Ошибка импорта: '+err.message)}};rd.readAsText(f);}
 });
 document.addEventListener('submit',e=>{
-const f=e.target;if(!['coupon-form','checkout-form','profile-form','product-form','promo-form','settings-form'].includes(f.id))return;e.preventDefault();
-const d=Object.fromEntries(new FormData(f));
-if(f.id==='coupon-form'){let code=String(d.code||'').trim().toUpperCase();if(!promoDiscount(code)){notice('Промокод не найден или выключен');return}view.appliedPromo=code;render();notice('Промокод применён');return;}
-if(f.id==='checkout-form'){
+const f=e.target,formId=f.getAttribute('id');if(!['coupon-form','checkout-form','profile-form','product-form','promo-form','settings-form'].includes(formId))return;e.preventDefault();
+const formData=new FormData(f),d=Object.fromEntries(formData);if(formId==='product-form')d.sizes=formData.getAll('sizes');
+if(formId==='coupon-form'){let code=String(d.code||'').trim().toUpperCase();if(!promoDiscount(code)){notice('Промокод не найден или выключен');return}view.appliedPromo=code;render();notice('Промокод применён');return;}
+if(formId==='checkout-form'){
 if(!db.cart.length)return;
 const ordered=db.cart.filter(l=>product(l.id)).map(l=>{const p=product(l.id);return{id:p.id,name:p.name,price:p.price,size:l.size,qty:l.qty}});
 const discount=priceTotal()-discounted();
@@ -402,20 +420,22 @@ db.cart.forEach(l=>{const p=product(l.id);if(p)p.stock=Math.max(0,p.stock-l.qty)
 db.cart=[];view.appliedPromo='';save();view.orderDone=o.id;
 nav('profile');render();notice('Демо-заказ '+o.id+' создан и виден в профиле');return;
 }
-if(f.id==='profile-form'){
+if(formId==='profile-form'){
 for(const key of Object.keys(db.profile)){const val=d[key]??'';db.profile[key]=key==='name'?String(val).slice(0,60):(val===''?'':Math.min(250,Math.max(0,Number(val)||0)));}
 save();render();notice('Ваши мерки сохранены на устройстве');return;
 }
-if(f.id==='product-form'){
+if(formId==='product-form'){
 const id=String(d.id||'');const exists=product(id);
+const mainImage=!exists&&view.uploadedImages.length?view.uploadedImages[0]:asURL(d.image)||view.uploadedImages[0]||'docs/atelier-coat.jpg';
+const productImages=[mainImage,...view.uploadedImages.filter(src=>src!==mainImage)].slice(0,6);
 const item={id:exists?.id||'ed-'+Date.now().toString(36)+'-'+rand().slice(0,4).toLowerCase(),name:String(d.name||'').trim().slice(0,100),category:String(d.category||'Другое').slice(0,70),price:Math.max(0,Number(d.price)||0),compare:Math.max(0,Number(d.compare)||0),stock:Math.max(0,Math.floor(Number(d.stock)||0)),
-sizes:String(d.sizes||'ONE SIZE').split(',').map(v=>v.trim()).filter(Boolean).slice(0,20),color:String(d.color||'').slice(0,80),material:String(d.material||'').slice(0,100),description:String(d.description||'').slice(0,600),image:view.uploadedImage||asURL(d.image)||'docs/atelier-coat.jpg',video:asURL(d.video),badge:String(d.badge||'').slice(0,25),featured:d.featured==='on'};
+sizes:(Array.isArray(d.sizes)?d.sizes:[d.sizes]).map(v=>String(v||'').trim()).filter(Boolean).slice(0,20),sku:String(d.sku||'').trim().slice(0,80),brand:String(d.brand||'').trim().slice(0,80),color:String(d.color||'').slice(0,80),material:String(d.material||'').slice(0,100),description:String(d.description||'').slice(0,600),image:mainImage,images:productImages,video:asURL(d.video),badge:String(d.badge||'').slice(0,25),featured:d.featured==='on'};
 if(!item.name){notice('Укажите название');return}
 if(exists)Object.assign(exists,item);else db.products.unshift(item);
 save();closeModal();render();notice(exists?'Товар обновлён':'Товар добавлен');return;
 }
-if(f.id==='promo-form'){const code=String(d.code||'').toUpperCase();if(db.coupons.some(c=>c.code===code)){notice('Такой код уже существует');return}db.coupons.push({code,discount:Math.min(80,Math.max(1,Number(d.discount)||1)),active:true});save();render();notice('Промокод добавлен');return;}
-if(f.id==='settings-form'){for(const key of ['season','heroTitle','heroSubtitle','announcement'])db.settings[key]=String(d[key]||'').slice(0,500);db.settings.heroVideo=asURL(d.heroVideo);save();render();notice('Настройки локально сохранены');return;}
+if(formId==='promo-form'){const code=String(d.code||'').toUpperCase();if(db.coupons.some(c=>c.code===code)){notice('Такой код уже существует');return}db.coupons.push({code,discount:Math.min(80,Math.max(1,Number(d.discount)||1)),active:true});save();render();notice('Промокод добавлен');return;}
+if(formId==='settings-form'){for(const key of ['season','heroTitle','heroSubtitle','announcement'])db.settings[key]=String(d[key]||'').slice(0,500);db.settings.heroVideo=asURL(d.heroVideo);save();render();notice('Настройки локально сохранены');return;}
 });
 let drag=null;
 document.addEventListener('pointerdown',e=>{if(e.target.id==='studio-face'){drag={pointer:e.pointerId};e.target.setPointerCapture(e.pointerId);e.preventDefault()}});
