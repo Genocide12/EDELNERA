@@ -1,5 +1,15 @@
 # EDELNERA — Changelog
 
+## v0.5.0 · 2026-11-13 — Editorial Storefront & Product Media
+
+**Storefront redesign:** Reworked the storefront colors and surfaces into a dark luxury editorial direction based on the supplied EDELNERA mockups. Atelier, Noir and Malachite now keep distinct dark palettes while preserving the catalogue and administration.
+
+**Product photo management:** Admin Studio can mark a main photo and reorder the gallery by dragging. Up/down controls also work on touch screens. Product cards show all saved product photos in a thumbnail strip and allow shoppers to switch the lead photo without opening the gallery.
+
+**Inventory workbook:** Rebuilt the formatted assortment workbook with actual per-size stock counts for all 386 women's and 1,012 men's positions. Products whose source tables did not name a size retain those counts in a separate “Размер не указан” column; no size counts were inferred from a check mark.
+
+**Quality:** Added browser coverage for choosing a main photo, drag ordering, card gallery thumbnails and photo switching. Visual and smoke suites passed on desktop and mobile.
+
 ## v0.4.0 · 2026-11-13 — Assortment & Product Galleries
 
 **Imported inventory:** 386 women's and 1,012 men's positions from the supplied Word tables, preserving articles, brands, prices, available-size labels and source-table references. Added the formatted workbook to `docs/` and shared temporary product imagery pending real photos.

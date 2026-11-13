@@ -39,6 +39,13 @@ try{
  ]);
  await desktop.locator('.admin-image-thumb').nth(1).waitFor();
  assert.equal(await desktop.locator('.admin-image-thumb').count(),2,'multiple photos are previewed in admin');
+ const uploaded=desktop.locator('.admin-image-thumb');
+ const photoA=await uploaded.nth(0).locator('img').getAttribute('src');
+ const photoB=await uploaded.nth(1).locator('img').getAttribute('src');
+ await uploaded.nth(1).locator('[data-action="main-uploaded-image"]').click();
+ assert.equal(await desktop.locator('.admin-image-thumb img').nth(0).getAttribute('src'),photoB,'main photo can be selected');
+ await desktop.locator('.admin-image-thumb').nth(1).dragTo(desktop.locator('.admin-image-thumb').nth(0));
+ assert.equal(await desktop.locator('.admin-image-thumb img').nth(0).getAttribute('src'),photoA,'photos can be reordered by dragging');
  await desktop.locator('#admin-image-preview').scrollIntoViewIfNeeded();
  await desktop.screenshot({path:'artifacts/admin-multi-photo-upload.png'});
  await desktop.locator('#product-form [name="name"]').fill('Gallery upload check');
@@ -50,6 +57,10 @@ try{
  assert.equal(await desktop.locator('.admin-image-thumb').count(),2,'uploaded photos persist after saving');
  await desktop.locator('.modal-close').click();
  await desktop.goto(base+'#/catalog');await desktop.locator('#catalog-search').fill('Gallery upload check');
+ assert.equal(await desktop.locator('.product-thumbnails .product-thumb').count(),2,'product cards show every uploaded photo immediately');
+ const cardImage=desktop.locator('.product-card .product-media>img');
+ await desktop.locator('.product-thumb').nth(1).click();
+ assert.equal(await cardImage.getAttribute('src'),photoB,'card thumbnail switches the lead image');
  await desktop.locator('.product-zoom').click();await desktop.locator('.quick-view-modal').waitFor();
  assert.equal(await desktop.locator('#quick-photo-count').textContent(),'1 / 2');
  await desktop.locator('[data-action="quick-move"][data-delta="1"]').click();

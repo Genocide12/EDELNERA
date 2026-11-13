@@ -27,17 +27,17 @@ EDELNERA is a working, mobile-first **interactive storefront prototype**, not me
 
 ## Three creative directions
 
-**01 / ATELIER** — pale stone, champagne, warm neutral.  
-**02 / NOIR** — contemporary graphite-green, soft light.  
-**03 / MALACHITE** — bright mineral green, botanical refinement.
+**01 / ATELIER** — warm black, champagne accents and editorial light.  
+**02 / NOIR** — deep graphite, crisp ivory and silver detail.  
+**03 / MALACHITE** — forest green, mineral highlights and botanical depth.
 
 Select a theme from the ◐ icon in the header or from the three creative cards on the home page. Themes persist in the current browser.
 
-## Features implemented in v0.4.0
+## Features implemented in v0.5.0
 
 | Area | What works in the demo |
 |---|---|
-| **Homepage** | Responsive editorial composition, animated hero image, optional real MP4/WebM video URL |
+| **Homepage** | Dark, responsive fashion-house composition inspired by the supplied mockups, animated hero image, optional real MP4/WebM video URL |
 | **Product gallery** | Category sections and featured collections |
 | **Catalogue** | 1,398 positions transcribed from the supplied women's and men's assortment documents, search, category filtering, sorting, new/featured labels, and 24-card paging |
 | **Motion** | 3.3-second animated still photos on desktop hover and iPhone tap, video playback if a URL is configured |
@@ -48,7 +48,7 @@ Select a theme from the ◐ icon in the header or from the three creative cards 
 | **Customer profile** | Height, chest, waist, hip and shoulder measurements saved locally |
 | **Face photo** | Upload portrait-only image, kept only in the current browser tab |
 | **Style Studio** | Face-image positioning over a garment image, adjustable scale and movement preview |
-| **Admin Studio** | Product CRUD, article/brand, prices, sizes, inventory, featured items, multiple local photo uploads and a paged catalogue editor |
+| **Admin Studio** | Product CRUD, article/brand, prices, sizes, inventory, featured items, main-photo selection, drag-and-drop photo ordering, and a paged catalogue editor |
 | **Admin orders** | List sample orders, change their local statuses |
 | **Admin marketing** | Manage demo promo codes |
 | **Admin content** | Hero title, season, announcement, video URL, theme switching |
@@ -59,7 +59,7 @@ Select a theme from the ◐ icon in the header or from the three creative cards 
 
 ### Imported assortment
 
-The supplied Word tables were converted into 386 women's and 1,012 men's product records. Each position uses the same temporary catalogue image until a real product photo is added in Admin Studio. Brand, article, source table, price, and listed size data are retained where present. The original files do not identify the price currency, while the demo storefront displays its configured currency symbol; confirm the source currency before using the prices commercially. The formatted workbook is available at [docs/assortment-formatted.xlsx](docs/assortment-formatted.xlsx).
+The supplied Word tables were converted into 386 women's and 1,012 men's product records. The formatted workbook now has a separate stock column for each size and a separate “Размер не указан” quantity where the source does not identify the size. Product positions use the same temporary catalogue image until real product photography is added. Brand, article, source table, price and size data are retained where present. The source files do not identify the price currency; confirm it before commercial use. Download [the formatted workbook](docs/assortment-formatted.xlsx).
 
 ### Customer experience
 
@@ -75,7 +75,7 @@ All demo checkout fields can use fictional details. No real payment details are 
 
 Open **Admin Studio** from the footer. It has **Dashboard**, **Products**, **Orders**, **Promo codes**, **Content & media**, and **Import / export**.
 
-Admin product imagery can be provided through a URL or by selecting up to six JPG/PNG/WebP images at once; uploads are compressed, previewed and saved only in this browser. Tap **УВЕЛИЧИТЬ ФОТО** on a catalogue card to open the larger gallery. MP4/WebM direct URLs may be configured per item and for the hero. For public production use, media should be hosted on an owned/CDN storage service under the correct licence. Avoid putting API keys or customer secrets in a static site.
+Admin product imagery can be provided through a URL or by selecting up to six JPG/PNG/WebP images at once. Choose a main photo, drag photos into order, or use ↑/↓ on mobile; the product card shows every saved photo as a thumbnail strip and lets shoppers switch the lead image. Uploads are compressed and saved only in this browser. Tap **УВЕЛИЧИТЬ ФОТО** to open the larger gallery. MP4/WebM direct URLs may be configured per item and for the hero. For production, host licensed media in owned/CDN storage; do not place API keys or customer secrets in this static site.
 
 ## Architecture
 
@@ -125,6 +125,7 @@ The repository **About → Website** field links to the live demo.
 - **v0.1.0:** Initial static store concept.
 - **v0.2.0:** Kinetic catalogue, three themes, initial local portrait and project documentation.
 - **v0.4.0:** Imported both supplied assortment tables, added paged 1,398-item catalogue/admin lists, multi-photo uploads and enlarged quick-view galleries.
+- **v0.5.0:** Reworked the storefront around the supplied dark editorial mockups; added main-photo selection, drag ordering, mobile move controls, and visible photo strips on product cards. Formatted stock by size from both source documents.
 - **v0.3.0:** New full-store demo, local Admin Studio, order lifecycle, media management, personalised style preview and mobile visual QA.
 
 See [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/Genocide12/EDELNERA/releases). Releases are automatically created from the `VERSION` file after a successful push to `main`.
