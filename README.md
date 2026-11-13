@@ -112,15 +112,13 @@ python3 -m http.server 4173
 
 The site does not require a build tool or paid database.
 
-### Publish with GitHub Pages (one-time owner action)
+### GitHub Pages
 
-This repository currently needs its initial GitHub Pages activation. Open **Settings → Pages → Build and deployment**, select **Deploy from a branch**, then **main / (root)** and click **Save**.
-
-The public link will then be **https://genocide12.github.io/EDELNERA/**. If it returns 404, Pages is not yet enabled or the initial deployment is still processing.
+The demo is published from **main / (root)** at **[genocide12.github.io/EDELNERA](https://genocide12.github.io/EDELNERA/)**. GitHub Pages is enabled for this repository; the latest verified deployment responds successfully.
 
 ### GitHub About / Website
 
-The `Website` field under **About** can be edited by a repository administrator. Paste `https://genocide12.github.io/EDELNERA/` when Pages is active. The current GitHub connector does not expose updating repository homepage metadata.
+The repository **About → Website** field links to the live demo.
 
 ## Versions
 
