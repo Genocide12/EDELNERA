@@ -10,7 +10,7 @@
     &nbsp;&nbsp;·&nbsp;&nbsp;
     <a href="https://github.com/Genocide12/EDELNERA/actions"><strong>VISUAL QA ↗</strong></a>
   </p>
-  <p><sub>⚠️ The demo link becomes available only after GitHub Pages is enabled in this repository's Settings → Pages.</sub></p>
+  <p><a href="README_RU.md">Русская версия README</a> · <a href="README.md">English</a></p>
 </div>
 
 ---
@@ -33,7 +33,7 @@ EDELNERA is a working, mobile-first **interactive storefront prototype**, not me
 
 Select a theme from the ◐ icon in the header or from the three creative cards on the home page. Themes persist in the current browser.
 
-## Features implemented in v0.5.0
+## Features implemented in v0.5.1
 
 | Area | What works in the demo |
 |---|---|
@@ -85,6 +85,14 @@ Admin product imagery can be provided through a URL or by selecting up to six JP
 
 **Later:** authenticated admin + real product database, inventory/order API, licensed image/video CDN, payment processor, AI avatar generation with explicit consent, measurement-specific size engine, privacy controls, monitoring and security auditing.
 
+### Where catalogue data and photos live
+
+There is **no shared database or media server** in this GitHub Pages demo. The initial sample products are declared in `assets/app.js`; the 1,398 imported catalogue records are checked into `assets/imported-catalog.js` as the `window.edelneraInventory` array. Product records reference image paths in the repository. The imported products currently use `docs/atelier-coat.jpg` as a shared placeholder; the editorial sample items use `docs/atelier-*.jpg` and the homepage uses `docs/hero.jpg`.
+
+Changes made in Admin Studio, customer orders, favourites, measurements, themes and uploaded product photos are stored in the current browser's `localStorage` under `edelnera:atelier-v3`. Resized uploads are saved as image data inside that browser profile. They **do not** modify repository files, sync to another device, or appear for other visitors. Use Admin → **Import / export** to back up local demo changes as JSON. The face portrait is session-only and is not included in the export.
+
+For a shared production catalogue, the site needs a backend database, authenticated Admin API and private media storage/CDN. Those services are not configured here. The Excel assortment file records stock by size; the demo website currently has a single aggregate stock field per product.
+
 ## Quality assurance
 
 ### Interface screenshots
@@ -110,7 +118,7 @@ python3 -m http.server 4173
 # open http://localhost:4173
 ```
 
-The site does not require a build tool or paid database.
+No build tool is required. The demo runs without a backend database.
 
 ### GitHub Pages
 
@@ -124,9 +132,10 @@ The repository **About → Website** field links to the live demo.
 
 - **v0.1.0:** Initial static store concept.
 - **v0.2.0:** Kinetic catalogue, three themes, initial local portrait and project documentation.
+- **v0.3.0:** New full-store demo, local Admin Studio, order lifecycle, media management, personalised style preview and mobile visual QA.
 - **v0.4.0:** Imported both supplied assortment tables, added paged 1,398-item catalogue/admin lists, multi-photo uploads and enlarged quick-view galleries.
 - **v0.5.0:** Reworked the storefront around the supplied dark editorial mockups; added main-photo selection, drag ordering, mobile move controls, and visible photo strips on product cards. Formatted stock by size from both source documents.
-- **v0.3.0:** New full-store demo, local Admin Studio, order lifecycle, media management, personalised style preview and mobile visual QA.
+- **v0.5.1:** Added the Russian README and documented exactly where source products, sample media, browser edits and uploads are stored.
 
 See [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/Genocide12/EDELNERA/releases). Releases are automatically created from the `VERSION` file after a successful push to `main`.
 

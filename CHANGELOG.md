@@ -1,5 +1,9 @@
 # EDELNERA — Changelog
 
+## v0.5.1 · 2026-11-13 — Russian Documentation & Data Storage Guide
+
+Added a full Russian README alongside the English guide and linked both from the repository front page. Documented the static catalogue source, repository-hosted placeholder images, browser-local Admin Studio data, uploaded photo storage, JSON backup, and the backend services required for shared production data.
+
 ## v0.5.0 · 2026-11-13 — Editorial Storefront & Product Media
 
 **Storefront redesign:** Reworked the storefront colors and surfaces into a dark luxury editorial direction based on the supplied EDELNERA mockups. Atelier, Noir and Malachite now keep distinct dark palettes while preserving the catalogue and administration.
